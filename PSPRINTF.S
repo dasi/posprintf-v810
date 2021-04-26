@@ -24,8 +24,7 @@
 ; r14 <- number of digits to print  r14 <- number of digits to print
 ; r15 <- leading char (' ' or '0')	r15 <- leading char (' ' or '0')
 ; r16 <- current parameter pointer	r16 <- current parameter ptr
-; r17 <-							r17 <-
-; r18 <-							r18 <- source string address
+; r17 <-							r17 <- source string address
 ; r31 <-							r31 <- lp
 
 ; Function parameters:
@@ -51,16 +50,15 @@ _posprintf:
 	st.w	r9, 12[sp]
 	movea	8, sp, r16				; r16 <- first parameter pointer
 
-	addi	-36, sp, sp				; save clobbered registers
+	addi	-32, sp, sp				; save clobbered registers
 	st.w	r31, 0[sp]
-	st.w	r18, 4[sp]
-	st.w	r17, 8[sp]
-	st.w	r16, 12[sp]
-	st.w	r15, 16[sp]
-	st.w	r14, 20[sp]
-	st.w	r13, 24[sp]
-	st.w	r12, 28[sp]
-	st.w	r11, 32[sp]
+	st.w	r17, 4[sp]
+	st.w	r16, 8[sp]
+	st.w	r15, 12[sp]
+	st.w	r14, 16[sp]
+	st.w	r13, 20[sp]
+	st.w	r12, 24[sp]
+	st.w	r11, 28[sp]
 
 L_STRINGLOOP:
 	ld.b	0[r7], r10				; load a char from r7
@@ -74,15 +72,14 @@ L_STRINGLOOP:
 	bne		L_STRINGLOOP			;			repeat for next char	
 	; cleanup and exit
 	ld.w	0[sp], r31				; restore clobbered registers
-	ld.w	4[sp], r18
-	ld.w	8[sp], r17
-	ld.w	12[sp], r16
-	ld.w	16[sp], r15
-	ld.w	20[sp], r14
-	ld.w	24[sp], r13
-	ld.w	28[sp], r12
-	ld.w	32[sp], r11
-	addi	36, sp, sp
+	ld.w	4[sp], r17
+	ld.w	8[sp], r16
+	ld.w	12[sp], r15
+	ld.w	16[sp], r14
+	ld.w	20[sp], r13
+	ld.w	24[sp], r12
+	ld.w	28[sp], r11
+	addi	32, sp, sp
 	jmp		[r31]					; return from subroutine
 
 L_FORMATENTRY:
@@ -169,7 +166,7 @@ L_PRINT29:
 	cmp		0, r6					; if integer to print is negative
 	blt		L_PRINTSIGN				;		print the sign and adjust
 L_SIGN29DONE:
-	mov		r7, r18
+	mov		r7, r17
 	movea	0x2710, r0, r7			; r7 <- 0x2710 == 10000
 	divu	r7, r6					; split number by dividing by 10000
 	mov		r30, r7
@@ -178,9 +175,9 @@ L_SIGN29DONE:
 	be		L_P29SKIP				;		then skip it
 	add		-4, sp
 	st.w	r7, 0[sp]				; save the second number to display
-	mov		r18, r7
+	mov		r17, r7
 	jal		L_PROCESS16			    ; process a 16-bit number
-	mov		r7, r18
+	mov		r7, r17
 	ld.w	0[sp], r7				; load in the second number
 	add		4, sp
 	mov		0, r14					; print leading symbols now!
@@ -188,31 +185,30 @@ L_SIGN29DONE:
 L_P29SKIP:
 	mov		r7, r6					; get ready to print second number
 	add		4, r14					; add 4 back on to digits
-	mov		r18, r7
+	mov		r17, r7
 	jal		L_PROCESS16		    	; process a 16-bit number
 	jr		L_STRINGLOOP
 
 L_PRINTHEXLC:
-	movea	39, r0, r18				; lowercase offset			
+	movea	39, r0, r17				; lowercase offset			
 	br		L_PRINTHEX
 L_PRINTHEXUC:
-	mov		7, r18					; uppercase offset
+	mov		7, r17					; uppercase offset
 L_PRINTHEX:
 	ld.w	0[r16], r8				; r8 <- integer to print
 	add		4, r16					; increase parameter pointer			
 	movea	28, r0, r10				; r10 <- 8 digits to cycle through
-	mov		0xF, r12				; r12 <- nibble mask
 	mov		0, r13					; r13 <- print flag
 L_PRINTHEXLOOP:
 	mov		r8, r9
 	shr		r10, r9
-	and		r12, r9					; r9 <- (n >> (cycle * 4)) & 0xF
+	andi	0xF, r9, r9				; r9 <- (n >> (cycle * 4)) & 0xF
 	or		r9, r13					; if we have not encountered a digit
 	be		L_PH_LEADZERO			;			then it is a leading zero
 	addi	'0', r9, r9
-	mov		r18, r11				; get ready to print a letter
-	movea	'9', r0, r17
-	cmp		r17, r9					; if the digit is in the alpha range
+	mov		r17, r11				; get ready to print a letter
+	movea	'9', r0, r12
+	cmp		r12, r9					; if the digit is in the alpha range
 	bgt		L_PH_ALPHA				;			then print a letter
 	mov		0, r11					; else do nothing
 L_PH_ALPHA:
@@ -240,7 +236,7 @@ L_PH_FINAL:
 	jr		L_STRINGLOOP
 
 L_PROCESS16:
-	mov		r7, r18					; free up r7
+	mov		r7, r17					; free up r7
 	mov		0xF, r11
 	mov		r6, r7
 	shr		4, r7
@@ -376,7 +372,7 @@ L_DONE_D1:
 	add		1, r13
 	; Done at last! Clean up and return to calling routine
 	mov		r13, r6					; restore r6 <- dest string address
-	mov		r18, r7					; restore r7 <- source string address
+	mov		r17, r7					; restore r7 <- source string address
 	jmp		[r31]					; return from subroutine
 
 L_LEAD_D4:
