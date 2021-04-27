@@ -60,10 +60,10 @@ _posprintf:
 	st.w	r12, 24[sp]
 	st.w	r11, 28[sp]
 
+	movea	'%', r0, r12
 L_STRINGLOOP:
 	ld.b	0[r7], r10				; load a char from r7
 	add		1, r7					; advance pointer to next char
-	movea	'%', r0, r12
 	cmp		r12, r10				; if char == '%' then
 	be		L_FORMATENTRY			;			handle the format specifier
 	st.b	r10, 0[r6]				; store the char back to memory
@@ -122,7 +122,7 @@ L_SETLEAD:
 L_PRINTSYMBOL:
 	st.b	r10, 0[r6]				; store '%' symbol to memory
 	add		1, r6					; advance pointer to next char
-	br		L_STRINGLOOP
+	br		L_STRINGLOOP-4
 
 L_PRINTSTR:
 	ld.w	0[r16], r8				; r8 <- address of string to print
@@ -131,7 +131,7 @@ L_PRINTSTRLOOP:
 	ld.b	0[r8], r10				; load a char from r8
 	add		1, r8					; advance pointer to next char
 	cmp		0, r10					; if char == 0
-	be		L_STRINGLOOP			;			then we are done
+	be		L_STRINGLOOP-4			;			then we are done
 	st.b	r10, 0[r6]				; store the char back to memory
 	add		1, r6					; advance pointer to next char
 	br		L_PRINTSTRLOOP
@@ -145,7 +145,7 @@ L_PRINT16:
 	blt		L_PRINTSIGN				;		print the sign and adjust
 L_SIGNDONE:
 	jal		L_PROCESS16				; process a 16-bit number	
-	br		L_STRINGLOOP			; return when done
+	br		L_STRINGLOOP-4			; return when done
 
 L_PRINTSIGN:
 	movea	'-', r0, r10
@@ -187,7 +187,7 @@ L_P29SKIP:
 	add		4, r14					; add 4 back on to digits
 	mov		r17, r7
 	jal		L_PROCESS16		    	; process a 16-bit number
-	jr		L_STRINGLOOP
+	jr		L_STRINGLOOP-4
 
 L_PRINTHEXLC:
 	movea	39, r0, r17				; lowercase offset			
@@ -217,7 +217,7 @@ L_PH_ALPHA:
 	add		1, r6					; advance pointer to next char
 	add		-4, r10					; advance to next digit
 	bge		L_PRINTHEXLOOP			; loop until done
-	jr		L_STRINGLOOP
+	jr		L_STRINGLOOP-4
 
 L_PH_LEADZERO:
 	mov		r10, r11
@@ -233,7 +233,7 @@ L_PH_FINAL:
 	movea	'0', r0, r9				; if n == 0, print at least one 0
 	st.b	r9, 0[r6]
 	add		1, r6
-	jr		L_STRINGLOOP
+	jr		L_STRINGLOOP-4
 
 L_PROCESS16:
 	mov		r7, r17					; free up r7
