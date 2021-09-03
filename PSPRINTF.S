@@ -40,25 +40,19 @@
 	lprefix ' '
 	rsvreg	1
 	oncnum
-	pubon
 
 text group
 
+	even 2
+	public _posprintf
 _posprintf:
 
 	st.w	r8, 8[sp]
 	st.w	r9, 12[sp]
 	movea	8, sp, r16				; r16 <- first parameter pointer
 
-	addi	-32, sp, sp				; save clobbered registers
+	add		-4, sp					; save clobbered registers
 	st.w	r31, 0[sp]
-	st.w	r17, 4[sp]
-	st.w	r16, 8[sp]
-	st.w	r15, 12[sp]
-	st.w	r14, 16[sp]
-	st.w	r13, 20[sp]
-	st.w	r12, 24[sp]
-	st.w	r11, 28[sp]
 
 	movea	'%', r0, r12
 L_STRINGLOOP:
@@ -72,14 +66,7 @@ L_STRINGLOOP:
 	bne		L_STRINGLOOP			;			repeat for next char	
 	; cleanup and exit
 	ld.w	0[sp], r31				; restore clobbered registers
-	ld.w	4[sp], r17
-	ld.w	8[sp], r16
-	ld.w	12[sp], r15
-	ld.w	16[sp], r14
-	ld.w	20[sp], r13
-	ld.w	24[sp], r12
-	ld.w	28[sp], r11
-	addi	32, sp, sp
+	add		4, sp
 	jmp		[r31]					; return from subroutine
 
 L_FORMATENTRY:
