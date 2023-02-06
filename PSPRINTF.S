@@ -282,13 +282,12 @@ L_PROCESS16:
 	shr		4, r11					; r11 <- d3 / 10
 	; calculate remainder as d3
 	mov		r11, r12
+	be		L_LEAD_D4
 	shl		2, r12
 	add		r11, r12
 	shl		1, r12
 	sub		r12, r9					; r9 <- d3 - (q * 10)
 	; finished with d3, d4 will automatically be quotient
-	cmp		0, r11
-	be		L_LEAD_D4
 	; now print any leading digits if we are using all five
 	add		-5, r14					; aleady printed five digits
 	movea	'0', r11, r10			; r10 <- d4 + '0'
