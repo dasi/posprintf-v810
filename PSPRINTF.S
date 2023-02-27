@@ -21,7 +21,7 @@
 ; r11 <- 							r11 <- work register
 ; r12 <- 							r12 <- work register
 ; r13 <- 							r13 <- dest string address
-; r14 <- number of digits to print  r14 <- number of digits to print
+; r14 <- number of digits to print	r14 <- number of digits to print
 ; r15 <- leading char (' ' or '0')	r15 <- leading char (' ' or '0')
 ; r16 <- current parameter pointer	r16 <- current parameter ptr
 ; r17 <- source string address		r17 <- source string address
